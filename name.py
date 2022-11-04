@@ -81,7 +81,7 @@ class CheckOwnerMIxin:
     
 
 
-class User(RegisterMixin, LoginMixin, ChangePasswordMixin,ChangeUsernameMixin,): 
+class User(RegisterMixin, LoginMixin, ChangePasswordMixin,ChangeUsernameMixin, CheckOwnerMIxin): 
     def __init__(self, username, password) -> None:
         self.username = username
         self.password = self.validate_password(password)
@@ -102,3 +102,4 @@ class Post(CheckOwnerMIxin):
         self.price = price
         self.quantity = quantity
         self.owner = self.check(owner)
+
