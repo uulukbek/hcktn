@@ -53,21 +53,35 @@ class ChangePasswordMixin:
         
 class ChangeUsernameMixin:
     def change_name(self, old_name, new_name):
-        self.old_name = old_name
-        self.new_name = new_name
+        with open('user.json') as file:
+            data = json.load(file)
         
-        user_data = [username for username in data if username['name'] == old_name]
+        if old_name in [i['name'] for i in data if i['name'] == old_name]:
+            while new_name in [i['name'] for i in data if i['name'] == new_name]:
+                print('Пользователь с таким именем уже существует!')
+                new_name = input('Enter another name: ')
+            data[data.index([i for i in data if i['name'] == old_name][0])]['name'] = new_name
         
-        if user_data:
-            newName = [username for username in data if username['name'] == old_name]
-            if newName: 
-                raise Exception("Пользователь с таким именем уже существует, попробуйте еще раз!")
-        else: 
-            raise Exception("Нет такого зарегистрированного юзера в базе данных!")
+            with open('user.json', 'w') as file:
+                json.dump(data, file)
+                return 'Username changed successfully!'
+        else:
+            raise Exception('Нет такого зарегистрированного юзера в БД!')
+        
+    
+class CheckOwnerMIxin:
+    def check(self, owner): 
+        with open('user.json') as file:
+            data = json.load(file)
+              
+        if owner in [i['name'] for i in data]:
+            print('Post created')
+        else:
+            raise Exception('Нет такого пользователя!')
+    
 
 
-
-class User(RegisterMixin, LoginMixin, ChangePasswordMixin): 
+class User(RegisterMixin, LoginMixin, ChangePasswordMixin,ChangeUsernameMixin,): 
     def __init__(self, username, password) -> None:
         self.username = username
         self.password = self.validate_password(password)
@@ -81,8 +95,10 @@ class User(RegisterMixin, LoginMixin, ChangePasswordMixin):
             raise Exception("Пароль должен состоять из букв и цифр")
         return password
     
- 
-obj = User("Nurik", "YAnetakoizadrotkakya1")
-obj2 = User("Danchik", "Fkljflsjdflr44343")
-print(obj.register())
-print(obj2.register())
+class Post(CheckOwnerMIxin):
+    def __init__(self, title, description, price, quantity, owner) -> None:
+        self.title = title
+        self.descripton = description
+        self.price = price
+        self.quantity = quantity
+        self.owner = self.check(owner)
