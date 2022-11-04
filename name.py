@@ -40,7 +40,7 @@ class LoginMixin:
 class ChangePasswordMixin: 
     def change_password(self,name, old_password, new_password): 
         self.name = name 
-        self.old_password = old_password
+        self.userpassword = old_password
         self.new_password = new_password
         
         user_data = [username for username in data if username['name'] == name]
@@ -48,19 +48,24 @@ class ChangePasswordMixin:
         if user_data:
             user_index = data.index(user_data[0])
             if data[user_index]['password'] == old_password:
-                data[user_index]['password'] = input('')
+                data[user_index]['password'] = new_password
+                
+                json.dump(data, open('user.json', 'w'))
+                return "Вы успешно поменяли пароль"
+            raise Exception('Старый пароль указан не верно!')
+        return 'Имя юзера введен не правильно!'
                 
         
 class ChangeUsernameMixin:
     def change_name(self, old_name, new_name):
         with open('user.json') as file:
-            data = json.load(file)
+            data = json.load(file, 'w')
         
         if old_name in [i['name'] for i in data if i['name'] == old_name]:
             while new_name in [i['name'] for i in data if i['name'] == new_name]:
                 print('Пользователь с таким именем уже существует!')
                 new_name = input('Enter another name: ')
-            data[data.index([i for i in data if i['name'] == old_name][0])]['name'] = new_name
+            data[data.index([i for i in data if i['name'] == old_name][0])]["name"] = new_name
         
             with open('user.json', 'w') as file:
                 json.dump(data, file)
@@ -103,3 +108,5 @@ class Post(CheckOwnerMIxin):
         self.quantity = quantity
         self.owner = self.check(owner)
 
+user = User("Danchik", "passworddanchik05")
+user.change_password("Danchik", "passworddanchik07", "passworddanchik06")
